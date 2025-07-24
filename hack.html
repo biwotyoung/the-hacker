@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ACCESS GRANTED</title>
+<style>
+  :root {
+    --bg: #000;
+    --green: #00ff6a;
+    --green-dim: #00bb4d;
+    --accent: #0aff9d;
+    --danger: #ff2e63;
+    --muted: #0f0f0f;
+    --mono: "SF Mono", "Fira Code", "Consolas", monospace;
+  }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--bg);
+    color: var(--green);
+    font-family: var(--mono);
+    overflow: hidden;
+  }
+
+  #matrix {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .overlay {
+    position: relative;
+    z-index: 2;
+    height: 100vh;
+    width: 100vw;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+    padding: 2rem;
+  }
+
+  .container {
+    max-width: 900px;
+    width: 100%;
+    text-align: left;
+    pointer-events: auto;
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(0,255,106,0.15);
+    backdrop-filter: blur(3px);
+    box-shadow: 0 0 30px rgba(0,255,106,0.08);
+    padding: 2rem;
+  }
+
+  .glitch {
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-weight: 800;
+    text-transform: uppercase;
+    position: relative;
+    display: inline-block;
+    color: var(--green);
+    animation: glitch 2s infinite;
+    letter-spacing: 0.15em;
+  }
+
+  .glitch::before, .glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    mix-blend-mode: screen;
+    opacity: 0.6;
+  }
+
+  .glitch::before {
+    left: 2px; text-shadow: -2px 0 var(--danger);
+    animation: glitchTop 2s infinite;
+  }
+
+  .glitch::after {
+    left: -2px; text-shadow: -2px 0 #0ff;
+    animation: glitchBottom 1.8s infinite;
+  }
+
+  @keyframes glitch {
+    0% { transform: none; }
+    20% { transform: skew(0.5deg); }
+    40% { transform: skew(-0.6deg); }
+    60% { transform: skew(0.2deg); }
+    80% { transform: skew(-0.2deg); }
+    100% { transform: none; }
+  }
+
+  @keyframes glitchTop {
+    0% { clip-path: inset(0 0 80% 0); transform: translate(-2px, -2px); }
+    20% { clip-path: inset(0 0 70% 0); transform: translate(2px, 2px); }
+    40% { clip-path: inset(0 0 50% 0); transform: translate(-1px, 1px); }
+    60% { clip-path: inset(0 0 40% 0); transform: translate(1px, -1px); }
+    80% { clip-path: inset(0 0 20% 0); transform: translate(0, 0); }
+    100% { clip-path: inset(0 0 80% 0); transform: translate(-2px, -2px); }
+  }
+
+  @keyframes glitchBottom {
+    0% { clip-path: inset(80% 0 0 0); transform: translate(2px, 2px); }
+    20% { clip-path: inset(70% 0 0 0); transform: translate(-1px, 1px); }
+    40% { clip-path: inset(50% 0 0 0); transform: translate(1px, -1px); }
+    60% { clip-path: inset(40% 0 0 0); transform: translate(0, 0); }
+    80% { clip-path: inset(20% 0 0 0); transform: translate(-2px, -2px); }
+    100% { clip-path: inset(80% 0 0 0); transform: translate(2px, 2px); }
+  }
+
+  .typewriter {
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    color: var(--green-dim);
+    white-space: pre-wrap;
+    min-height: 3.2em;
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 10px;
+    background: var(--accent);
+    margin-left: 2px;
+    animation: blink 0.8s infinite;
+  }
+  @keyframes blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
+
+  .section-title {
+    margin-top: 2rem;
+    color: var(--accent);
+    font-size: 0.9rem;
+    letter-spacing: 0.15em;
+    opacity: 0.9;
+    text-transform: uppercase;
+  }
+
+  .log {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: #0f0;
+    max-height: 180px;
+    overflow-y: auto;
+    border-left: 2px solid rgba(0,255,106,0.2);
+    padding-left: 1rem;
+  }
+
+  .log::-webkit-scrollbar {
+    width: 6px;
+    background: transparent;
+  }
+  .log::-webkit-scrollbar-thumb {
+    background: rgba(0,255,106,0.2);
+  }
+
+  .bar {
+    margin: 0.5rem 0 1rem;
+    height: 8px;
+    background: rgba(0,255,106,0.1);
+    border: 1px solid rgba(0,255,106,0.2);
+    position: relative;
+    overflow: hidden;
+  }
+  .bar > span {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 0%;
+    background: var(--green);
+    box-shadow: 0 0 8px rgba(0,255,106,0.7);
+    transition: width 1s ease-out;
+  }
+
+  footer {
+    margin-top: 2rem;
+    font-size: 0.75rem;
+    opacity: 0.6;
+  }
+
+  @media (max-width: 600px) {
+    .container {
+      padding: 1.25rem;
+    }
+    .glitch {
+      letter-spacing: 0.08em;
+    }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="matrix"></canvas>
+
+<div class="overlay" id="app" style="display:none;">
+  <div class="container">
+    <div class="glitch" id="glitch" data-text="ACCESS GRANTED">ACCESS GRANTED</div>
+    <div class="typewriter" id="typewriter"></div>
+
+    <div class="section-title">User Profile</div>
+    <pre id="profile">
+  Name: <b id="nameField"></b>
+  Status: VERIFIED ✅
+  Rank: Level 7 – Encrypted
+  Token: <span id="token"></span>
+  Last Seen: <span id="lastSeen"></span>
+    </pre>
+
+    <div class="section-title">System Checks</div>
+    <div class="bar"><span id="bar1"></span></div>
+    <div class="bar"><span id="bar2"></span></div>
+    <div class="bar"><span id="bar3"></span></div>
+
+    <div class="section-title">Live Log</div>
+    <div class="log" id="log"></div>
+
+    <footer>
+      [session_id: <span id="session"></span>] [route: /secure/core] [build: v3.91] &nbsp;|&nbsp; Press F to pay respects.
+    </footer>
+  </div>
+</div>
+
+<script>
+/* ========= Prompt for username first ========= */
+let USERNAME = (function() {
+  let u = prompt("Enter your name:");
+  if (!u || !u.trim()) u = "Anonymous";
+  return u.trim();
+})();
+
+/* ========= Helper: random hex ========= */
+function randHex(len = 6) {
+  const chars = 'ABCDEF0123456789';
+  let out = '';
+  for (let i = 0; i < len; i++) out += chars[Math.floor(Math.random() * chars.length)];
+  return out;
+}
+
+/* ========= Matrix Rain ========= */
+(function matrixRain(){
+  const canvas = document.getElementById('matrix');
+  const ctx = canvas.getContext('2d');
+
+  let w, h, fontSize, columns, drops;
+  const characters = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズヅブプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+  const resize = () => {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+    fontSize = Math.max(12, Math.floor(w / 60));
+    columns = Math.floor(w / fontSize);
+    drops = Array(columns).fill(1);
+  };
+
+  const draw = () => {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#00ff6a';
+    ctx.font = fontSize + 'px monospace';
+    for (let i = 0; i < drops.length; i++) {
+      const text = characters[Math.floor(Math.random() * characters.length)];
+      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+      if (drops[i] * fontSize > h && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    }
+    requestAnimationFrame(draw);
+  };
+
+  window.addEventListener('resize', resize);
+  resize();
+  draw();
+})();
+
+/* ========= Initialize UI with USERNAME ========= */
+(function initUI(){
+  const app = document.getElementById('app');
+  const glitch = document.getElementById('glitch');
+  const nameField = document.getElementById('nameField');
+  const token = document.getElementById('token');
+  const lastSeen = document.getElementById('lastSeen');
+  const session = document.getElementById('session');
+
+  const tokenVal = `${randHex(6)}-${USERNAME.toUpperCase().replace(/\s+/g,'').slice(0,4)}-${new Date().getFullYear()}`;
+  const sessVal = '0x' + randHex(8);
+
+  glitch.dataset.text = `ACCESS GRANTED - ${USERNAME}`;
+  glitch.textContent = `ACCESS GRANTED - ${USERNAME}`;
+  nameField.textContent = USERNAME;
+  token.textContent = tokenVal;
+  lastSeen.textContent = new Date().toISOString();
+  session.textContent = sessVal;
+
+  app.style.display = 'grid';
+
+  startTypewriter(USERNAME);
+  startBars();
+  startLiveLog(USERNAME, tokenVal);
+})();
+
+/* ========= Typewriter ========= */
+function startTypewriter(username){
+  const el = document.getElementById('typewriter');
+  const text =
+`Initializing secure channel...
+User: ${username}
+Access Level: ROOT
+Status: ACCESS GRANTED`;
+  let i = 0;
+
+  function type() {
+    if (i < text.length) {
+      el.innerHTML = text.substring(0, i + 1) + '<span class="cursor"></span>';
+      i++;
+      setTimeout(type, 30 + Math.random() * 50);
+    } else {
+      el.innerHTML = text + '<span class="cursor"></span>';
+    }
+  }
+  type();
+}
+
+/* ========= Fake Progress Bars ========= */
+function startBars(){
+  const bars = [
+    { el: document.getElementById('bar1'), target: 93 },
+    { el: document.getElementById('bar2'), target: 61 },
+    { el: document.getElementById('bar3'), target: 100 }
+  ];
+  let i = 0;
+  const fillNext = () => {
+    if (i >= bars.length) return;
+    const { el, target } = bars[i];
+    setTimeout(() => {
+      el.style.width = target + '%';
+      i++;
+      fillNext();
+    }, 600);
+  };
+  fillNext();
+}
+
+/* ========= Live Log Generator ========= */
+function startLiveLog(username, token){
+  const log = document.getElementById('log');
+  const lines = [
+    '[ OK ] Network handshake complete',
+    '[ OK ] AI protocol sync: v3.91',
+    '[ WARN ] Entropy pool low, reseeding…',
+    '[ OK ] Secure layer active',
+    '[ ERR ] Memory overflow on channel 14',
+    '[ INFO ] Recovered: channel 14 stable',
+    '[ TRACE ] ping 8.8.8.8 -> 12ms',
+    `[ DEBUG ] token: ${token}`,
+    '[ OK ] Quantum thread aligned',
+    `[ INFO ] sudo nano /etc/${username.toLowerCase().replace(/[^a-z0-9]/g,'_')}.conf`,
+    `[ EXEC ] chmod +x ${username.toLowerCase().replace(/[^a-z0-9]/g,'_')}.sh`,
+    `[ LOG ] echo "Mission Ready, ${username}" >> ~/${username.toLowerCase().replace(/[^a-z0-9]/g,'_')}.log`,
+    '[ SYNC ] pushing telemetry -> 104.26.0.0/16',
+    '[ DONE ] All systems nominal'
+  ];
+
+  function pushRandom() {
+    const l = lines[Math.floor(Math.random() * lines.length)];
+    const span = document.createElement('div');
+    span.textContent = new Date().toISOString() + '  ' + l;
+    log.appendChild(span);
+    if (log.childNodes.length > 200) {
+      log.removeChild(log.firstChild);
+    }
+    log.scrollTop = log.scrollHeight;
+    setTimeout(pushRandom, 300 + Math.random() * 800);
+  }
+
+  pushRandom();
+}
+</script>
+</body>
+</html>
